@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import { FilterStatus } from '../../types/FilterStatus';
+import capitalize from '../../utils/capitalize';
 
 type Props = {
   setFilterStatus: (link: FilterStatus) => void;
@@ -7,6 +8,10 @@ type Props = {
   todosActiveQuantity: number;
   todosComplitedQuantity: number;
   clearAllComplitedTodos: () => void;
+};
+
+const formatFilterStatusHref = (filterStatus: FilterStatus): string => {
+  return `#/${filterStatus === FilterStatus.All ? '' : filterStatus}`;
 };
 
 export const Footer: React.FC<Props> = ({
@@ -23,38 +28,21 @@ export const Footer: React.FC<Props> = ({
       </span>
 
       <nav className="filter" data-cy="Filter">
-        <a
-          href="#/"
-          className={classNames('filter__link', {
-            selected: filterStatus === 'all',
-          })}
-          data-cy="FilterLinkAll"
-          onClick={() => setFilterStatus('all')}
-        >
-          All
-        </a>
-
-        <a
-          href="#/active"
-          className={classNames('filter__link', {
-            selected: filterStatus === 'active',
-          })}
-          data-cy="FilterLinkActive"
-          onClick={() => setFilterStatus('active')}
-        >
-          Active
-        </a>
-
-        <a
-          href="#/completed"
-          className={classNames('filter__link', {
-            selected: filterStatus === 'completed',
-          })}
-          data-cy="FilterLinkCompleted"
-          onClick={() => setFilterStatus('completed')}
-        >
-          Completed
-        </a>
+        {Object.values(FilterStatus).map(status => {
+          return (
+            <a
+              href={formatFilterStatusHref(status)}
+              className={classNames('filter__link', {
+                selected: filterStatus === status,
+              })}
+              data-cy={`FilterLink${capitalize(status)}`}
+              onClick={() => setFilterStatus(status)}
+              key={status}
+            >
+              {capitalize(status)}
+            </a>
+          );
+        })}
       </nav>
 
       <button

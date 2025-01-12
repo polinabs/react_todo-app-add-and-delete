@@ -15,11 +15,6 @@ export const createTodo = ({ userId, title, completed }: Omit<Todo, 'id'>) => {
   return client.post<Todo>('/todos', { userId, title, completed });
 };
 
-// Add more methods here
-/*
-  Your userId is
-  2214
-
-  Please use it for all your requests to the Students API. For example:
-  https://mate.academy/students-api/todos?userId=2214 
-*/
+export const updateTodo = (todo: Todo) => {
+  return client.patch<Todo>(`/todos/${todo.id}`, todo);
+};

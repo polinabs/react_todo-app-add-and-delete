@@ -8,14 +8,19 @@ import { Todo } from './types/Todo';
 import * as todoMethods from './api/todos';
 import { ErrorNotification } from './copmonents/Error/Error';
 import { FilterStatus } from './types/FilterStatus';
+import getTodosFilter from './utils/getTodosFilter';
 
 export const App: React.FC = () => {
+  //#region states
   const [todos, setTodos] = useState<Todo[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>(
+    FilterStatus.All,
+  );
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [deletingTodoIds, setDeletingTodoIds] = useState<number[] | null>(null);
   const [isInputDisabled, setInputDisabled] = useState(false);
+  //#endregion
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -36,22 +41,20 @@ export const App: React.FC = () => {
   }, []);
 
   const filteredTodos = useMemo((): Todo[] => {
-    if (filterStatus === 'all') {
+    const filterTodos = getTodosFilter(filterStatus);
+
+    if (!filterTodos) {
       return todos;
     }
 
-    if (filterStatus === 'active') {
-      return todos.filter(todo => !todo.completed);
-    }
-
-    return todos.filter(todo => todo.completed);
+    return filterTodos(todos);
   }, [filterStatus, todos]);
 
   const todosActiveQuantity = todos.filter(todo => !todo.completed).length;
   const todosComplitedQuantity = todos.filter(todo => todo.completed).length;
   const allTodosIsComplited = todos.every(todo => todo.completed);
 
-  async function addTodo(title: string): Promise<void> {
+  const addTodo = async (title: string): Promise<void> => {
     const userId = todoMethods.USER_ID;
 
     const temporaryTodo: Todo = {
@@ -81,9 +84,9 @@ export const App: React.FC = () => {
       setTempTodo(null);
       setInputDisabled(false);
     }
-  }
+  };
 
-  async function deleteTodo(todoId: number) {
+  const deleteTodo = async (todoId: number): Promise<void> => {
     setDeletingTodoIds(prev => (prev ? [...prev, todoId] : [todoId]));
     setInputDisabled(true);
 
@@ -100,9 +103,9 @@ export const App: React.FC = () => {
       );
       setInputDisabled(false);
     }
-  }
+  };
 
-  function clearAllComplitedTodos() {
+  const clearAllComplitedTodos = () => {
     const completedTodoIds = todos
       .filter(todo => todo.completed)
       .map(todo => todo.id);
@@ -120,7 +123,7 @@ export const App: React.FC = () => {
       setDeletingTodoIds(null);
       setInputDisabled(false);
     });
-  }
+  };
 
   return (
     <div className="todoapp">
